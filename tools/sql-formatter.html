@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SQL Formatter</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .display-box {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            background: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            width: 600px;
+            max-width: 90vw;
+            min-height: 120px;
+        }
+
+        textarea {
+            width: 600px;
+            max-width: 90vw;
+            height: 120px;
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            font-family: monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+
+        .controls {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="back-nav">
+    <div class="btn-back" onclick="goBack()">← Other tools</div>
+</nav>
+
+<div class="container padded-centered-wrapper">
+    <textarea id="inputSql" placeholder="Paste SQL here..."></textarea>
+
+    <div class="controls" style="margin-bottom: 20px; ">
+        <button onclick="formatSQL()">Format</button>
+        <button onclick="copySQL()" id="copyBtn">Copy</button>
+    </div>
+
+    <div id="outputSql" class="display-box"></div>
+</div>
+
+<script>
+    function formatSQL() {
+        const input = document.getElementById('inputSql').value;
+        const output = document.getElementById('outputSql');
+
+        if (!input.trim()) {
+            output.textContent = '';
+            return;
+        }
+
+        let formatted = input
+            // normalize spaces
+            .replace(/\s+/g, ' ')
+
+            // line breaks before keywords
+            .replace(/\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|HAVING|LIMIT|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|ON|AND|OR)\b/gi, '\n$1')
+
+            // indent AND/OR
+            .replace(/\n(AND|OR)\b/gi, '\n    $1')
+
+            // uppercase keywords
+            .replace(/\b(select|from|where|group by|order by|having|limit|join|left join|right join|inner join|outer join|on|and|or)\b/gi, match => match.toUpperCase())
+
+            // clean multiple newlines
+            .replace(/\n+/g, '\n')
+            .trim();
+
+        output.textContent = formatted;
+    }
+
+    function copySQL() {
+        const text = document.getElementById('outputSql').textContent;
+        if (!text) return;
+
+        const copyBtn = document.getElementById('copyBtn');
+        navigator.clipboard.writeText(text).then(() => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = 'Copy';
+            }, 800);
+        });
+    }
+
+    function goBack() {
+        window.location.href = "../";
+    }
+</script>
+
+</body>
+</html>
