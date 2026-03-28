@@ -57,6 +57,20 @@
             transform: scale(0.98);
         }
 
+        /* Styling for the back button specifically */
+        .btn-back {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer; /* Makes the cursor a hand pointer */
+            transition: background-color 0.2s ease, color 0.2s ease;
+            user-select: none; /* Prevents text selection on accidental double-clicks */
+        }
+
+        /* Hover state */
+        .btn-back:hover {
+            background-color: #e9ecef; /* Subtle grey background */
+        }
+
         #copyBtn {
             min-width: 80px; /* Prevents layout jump when text changes to "Copied!" */
         }
@@ -70,7 +84,7 @@
 
 <div class="container">
     <div id="uuid" class="uuid">Generating...</div>
-    <button onclick="generateUUID()">Generate</button>
+    <button onclick="generateUUID()">Generate UUID</button>
     <button id="copyBtn" onclick="copyUUID()">Copy</button>
 </div>
 
