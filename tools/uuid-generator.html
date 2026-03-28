@@ -102,10 +102,9 @@
         if (!currentUUID) return;
 
         navigator.clipboard.writeText(currentUUID).then(() => {
-            const originalText = copyBtn.textContent;
             copyBtn.textContent = 'Copied!';
             setTimeout(() => {
-                copyBtn.textContent = originalText;
+                copyBtn.textContent = 'Copy';
             }, 800);
         });
     }
