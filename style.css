@@ -61,3 +61,8 @@ button:hover {
 button:active {
     transform: scale(0.95);
 }
+
+#copyBtn {
+    min-width: 90px; /* This prevents the button from shrinking or growing */
+    text-align: center;
+}

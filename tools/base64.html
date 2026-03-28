@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Base64 Encoder / Decoder</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .display-box {
+            width: 100%;
+            max-width: 600px;
+            min-height: 120px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            background: #fff;
+            font-size: 14px;
+            margin-bottom: 16px;
+            resize: vertical;
+            font-family: monospace;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="back-nav">
+    <div class="btn-back" onclick="goBack()">← Other tools</div>
+</nav>
+
+<div class="container centered-wrapper">
+    <textarea id="input" class="display-box" placeholder="Enter text..."></textarea>
+    <textarea id="output" class="display-box" placeholder="Result..." readonly></textarea>
+
+    <div class="controls">
+        <button onclick="encodeBase64()">Encode Base64</button>
+        <button onclick="decodeBase64()">Decode Base64</button>
+        <button onclick="copyOutput()" id="copyBtn">Copy</button>
+    </div>
+</div>
+
+<script>
+    function goBack() {
+        window.location.href = "../";
+    }
+
+    function encodeBase64() {
+        try {
+            const input = document.getElementById("input").value;
+            const encoded = btoa(unescape(encodeURIComponent(input)));
+            document.getElementById("output").value = encoded;
+        } catch (e) {
+            document.getElementById("output").value = "Encoding error";
+        }
+    }
+
+    function decodeBase64() {
+        try {
+            const input = document.getElementById("input").value;
+            const decoded = decodeURIComponent(escape(atob(input)));
+            document.getElementById("output").value = decoded;
+        } catch (e) {
+            document.getElementById("output").value = "Invalid Base64 input";
+        }
+    }
+
+    function copyOutput() {
+        const copyBtn = document.getElementById('copyBtn');
+        const output = document.getElementById("output");
+        output.select();
+        document.execCommand("copy");
+        copyBtn.textContent = 'Copied!';
+        setTimeout(() => {
+            copyBtn.textContent = 'Copy';
+        }, 800);
+    }
+
+</script>
+
+</body>
+</html>
