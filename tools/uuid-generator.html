@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>UUID Generator</title>
+    <style>
+        body {
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            color: #222;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .uuid {
+            font-size: 20px;
+            margin-bottom: 20px;
+            word-break: break-all;
+            min-height: 1.2em;
+        }
+
+        button {
+            padding: 10px 16px;
+            margin: 5px;
+            border: none;
+            border-radius: 6px;
+            background: #e9ecef;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        button:hover {
+            background: #dee2e6;
+        }
+
+        button:active {
+            background: #0d6efd;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="uuid" class="uuid">Generating...</div>
+    <button onclick="generateUUID()">Generate</button>
+    <button id="copyBtn" onclick="copyUUID()">Copy</button>
+    <br>
+    <button onclick="goBack()">← Other tools</button>
+</div>
+
+<script>
+    const uuidDisplay = document.getElementById('uuid');
+    const copyBtn = document.getElementById('copyBtn');
+    let currentUUID = '';
+
+    function generateUUID() {
+        currentUUID = crypto.randomUUID();
+        uuidDisplay.textContent = currentUUID;
+    }
+
+    function copyUUID() {
+        if (!currentUUID) return;
+
+        navigator.clipboard.writeText(currentUUID).then(() => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = "Copy";
+            }, 500);
+        });
+    }
+
+    function goBack() {
+        if (document.referrer) {
+            window.history.back();
+        } else {
+            window.location.href = '..';
+        }
+    }
+
+    // Generate UUID immediately when page loads
+    window.onload = generateUUID;
+</script>
+
+</body>
+</html>
