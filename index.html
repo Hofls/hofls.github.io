@@ -5,15 +5,53 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Simple Tools Collection</title>
     <link rel="stylesheet" href="style.css">
+    <style>
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            text-align: center;
+        }
+
+        .tools-list {
+            max-width: 600px;
+            margin: 0 auto;
+            list-style: none;
+            padding: 0;
+        }
+
+        .tools-list li {
+            margin: 12px 0;
+        }
+
+        .tools-list a {
+            display: block;
+            padding: 16px 20px;
+            background: white;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #222;
+            font-size: 1.15rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: all 0.2s ease;
+        }
+
+        .tools-list a:hover {
+            background: #dee2e6;
+            transform: translateX(8px);
+        }
+    </style>
 </head>
 <body>
-    <ul class="tools-list">
-		<li><a href="tools/uuid-generator">UUID Generator</a></li>
-		<li><a href="tools/base64">Base64 Encoder / Decoder</a></li>
-        <li><a href="tools/jwt-viewer">JWT viewer</a></li>
-        <li><a href="tools/sql-formatter">SQL Formatter</a></li>
-        <li><a href="tools/srt-generator">Subtitles Generator (.srt)</a></li>
-        <li><a href="tools/json-formatter">JSON Formatter</a></li>
-    </ul>
+    <div class="container">
+        <ul class="tools-list">
+            <li><a href="tools/uuid-generator">UUID Generator</a></li>
+            <li><a href="tools/base64">Base64 Encoder / Decoder</a></li>
+            <li><a href="tools/jwt-viewer">JWT viewer</a></li>
+            <li><a href="tools/sql-formatter">SQL Formatter</a></li>
+            <li><a href="tools/srt-generator">Subtitles Generator (.srt)</a></li>
+            <li><a href="tools/json-formatter">JSON Formatter</a></li>
+        </ul>
+    </div>
 </body>
 </html>

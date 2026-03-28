@@ -2,123 +2,61 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>UUID Generator</title>
+    <link rel="stylesheet" href="../style.css"> </head>
     <style>
-        body {
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8f9fa;
-            color: #222;
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            position: relative; /* Necessary for absolute positioning of back button */
-        }
-
-        /* Improved Back Button Styling */
-        .back-nav {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-        }
-
-        .container {
-            text-align: center;
-        }
-
-        .uuid {
-            font-size: 24px; /* Slightly larger for better readability */
+        .display-box {
+            font-size: 24px;
             font-weight: 600;
             margin-bottom: 24px;
             word-break: break-all;
             min-height: 1.2em;
         }
-
-        button {
-            padding: 10px 18px;
-            margin: 5px;
-            border: none;
-            border-radius: 8px; /* Slightly rounder for a modern look */
-            background: #e9ecef;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.2s ease;
-            font-family: inherit;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-
-        button:hover {
-            background: #dee2e6;
-            transform: translateX(2px);
-        }
-
-        button:active {
-            transform: scale(0.85);
-        }
-
-        /* Styling for the back button specifically */
-        .btn-back {
-            padding: 8px 12px;
-            border-radius: 6px;
-            cursor: pointer; /* Makes the cursor a hand pointer */
-            transition: background-color 0.2s ease, color 0.2s ease;
-            user-select: none; /* Prevents text selection on accidental double-clicks */
-        }
-
-        /* Hover state */
-        .btn-back:hover {
-            background-color: #e9ecef; /* Subtle grey background */
-        }
-
-        #copyBtn {
-            min-width: 80px; /* Prevents layout jump when text changes to "Copied!" */
-        }
     </style>
 </head>
 <body>
+   <nav class="back-nav">
+       <div class="btn-back" onclick="goBack()">← Other tools</div>
+   </nav>
 
-<nav class="back-nav">
-    <div class="btn-back" onclick="goBack()">← Other tools</div>
-</nav>
+   <div class="container centered-wrapper">
+       <div id="uuid" class="display-box">Generating...</div>
+       <div class="controls">
+           <button onclick="generateUUID()">Generate UUID</button>
+           <button id="copyBtn" onclick="copyUUID()">Copy</button>
+       </div>
+   </div>
 
-<div class="container">
-    <div id="uuid" class="uuid">Generating...</div>
-    <button onclick="generateUUID()">Generate UUID</button>
-    <button id="copyBtn" onclick="copyUUID()">Copy</button>
-</div>
+   <script>
+       const uuidDisplay = document.getElementById('uuid');
+       const copyBtn = document.getElementById('copyBtn');
+       let currentUUID = '';
 
-<script>
-    const uuidDisplay = document.getElementById('uuid');
-    const copyBtn = document.getElementById('copyBtn');
-    let currentUUID = '';
+       function generateUUID() {
+           currentUUID = crypto.randomUUID();
+           uuidDisplay.textContent = currentUUID;
+       }
 
-    function generateUUID() {
-        currentUUID = crypto.randomUUID();
-        uuidDisplay.textContent = currentUUID;
-    }
+       function copyUUID() {
+           if (!currentUUID) return;
 
-    function copyUUID() {
-        if (!currentUUID) return;
+           navigator.clipboard.writeText(currentUUID).then(() => {
+               copyBtn.textContent = 'Copied!';
+               setTimeout(() => {
+                   copyBtn.textContent = 'Copy';
+               }, 800);
+           });
+       }
 
-        navigator.clipboard.writeText(currentUUID).then(() => {
-            copyBtn.textContent = 'Copied!';
-            setTimeout(() => {
-                copyBtn.textContent = 'Copy';
-            }, 800);
-        });
-    }
+       function goBack() {
+           if (document.referrer) {
+               window.history.back();
+           } else {
+               window.location.href = '..';
+           }
+       }
 
-    function goBack() {
-        if (document.referrer) {
-            window.history.back();
-        } else {
-            window.location.href = '..';
-        }
-    }
-
-    window.onload = generateUUID;
-</script>
+       window.onload = generateUUID;
+   </script>
 
 </body>
 </html>
