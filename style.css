@@ -18,6 +18,15 @@ body {
     min-height: 100vh;
 }
 
+.padded-centered-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding-top: 100px;
+}
+
 /* --- Navigation (back to "Other tools") --- */
 .back-nav {
     position: absolute;
