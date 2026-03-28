@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JWT Viewer</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .display-box {
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            word-break: break-all;
+            min-height: 1.2em;
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            white-space: pre-wrap; /* IMPORTANT: preserves JSON formatting */
+        }
+
+        textarea {
+            width: 100%;
+            max-width: 600px;
+            height: 100px;
+            margin-bottom: 16px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+        }
+
+        .section-title {
+            font-size: 13px;
+            opacity: 0.6;
+            margin-bottom: 6px;
+        }
+
+    </style>
+</head>
+<body>
+
+<nav class="back-nav">
+    <div class="btn-back" onclick="goBack()">← Other tools</div>
+</nav>
+
+<div class="container centered-wrapper" style="max-width: 700px; margin: auto;">
+
+    <textarea id="jwtInput" placeholder="Paste JWT here..."></textarea>
+
+    <div class="controls">
+        <button onclick="decodeJWT()">Decode</button>
+        <button onclick="clearAll()">Clear</button>
+    </div>
+
+    <div style="width: 100%; margin-top: 20px;">
+        <div class="section-title">Header</div>
+        <div id="headerBox" class="display-box"></div>
+
+        <div class="section-title">Payload</div>
+        <div id="payloadBox" class="display-box"></div>
+
+        <div class="section-title">Signature</div>
+        <div id="signatureBox" class="display-box"></div>
+    </div>
+
+</div>
+
+<script>
+    function base64UrlDecode(str) {
+        try {
+            str = str.replace(/-/g, '+').replace(/_/g, '/');
+            const pad = str.length % 4;
+            if (pad) {
+                str += '='.repeat(4 - pad);
+            }
+            return decodeURIComponent(atob(str).split('').map(c =>
+                '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+            ).join(''));
+        } catch {
+            return 'Invalid base64';
+        }
+    }
+
+    function formatJSON(str) {
+        try {
+            return JSON.stringify(JSON.parse(str), null, 2); // pretty print
+        } catch {
+            return str;
+        }
+    }
+
+    function decodeJWT() {
+        let input = document.getElementById('jwtInput').value.trim();
+
+        // 🔥 remove "Bearer " if present
+        if (input.startsWith('Bearer ')) {
+            input = input.slice(7).trim();
+        }
+
+        const parts = input.split('.');
+        const header = parts[0];
+        const payload = parts[1];
+        const signature = parts[2];
+
+        document.getElementById('headerBox').textContent =
+            header ? formatJSON(base64UrlDecode(header)) : '';
+
+        document.getElementById('payloadBox').textContent =
+            payload ? formatJSON(base64UrlDecode(payload)) : '';
+
+        document.getElementById('signatureBox').textContent =
+            signature || '';
+    }
+
+    function clearAll() {
+        document.getElementById('jwtInput').value = '';
+        document.getElementById('headerBox').textContent = '';
+        document.getElementById('payloadBox').textContent = '';
+        document.getElementById('signatureBox').textContent = '';
+    }
+
+    function goBack() {
+        window.location.href = "../";
+    }
+</script>
+
+</body>
+</html>

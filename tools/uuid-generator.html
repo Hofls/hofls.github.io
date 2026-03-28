@@ -27,11 +27,10 @@
    </div>
 
    <script>
-       const uuidDisplay = document.getElementById('uuid');
-       const copyBtn = document.getElementById('copyBtn');
        let currentUUID = '';
 
        function generateUUID() {
+           const uuidDisplay = document.getElementById('uuid');
            currentUUID = crypto.randomUUID();
            uuidDisplay.textContent = currentUUID;
        }
@@ -39,6 +38,7 @@
        function copyUUID() {
            if (!currentUUID) return;
 
+           const copyBtn = document.getElementById('copyBtn');
            navigator.clipboard.writeText(currentUUID).then(() => {
                copyBtn.textContent = 'Copied!';
                setTimeout(() => {
@@ -48,11 +48,7 @@
        }
 
        function goBack() {
-           if (document.referrer) {
-               window.history.back();
-           } else {
-               window.location.href = '..';
-           }
+           window.location.href = "../";
        }
 
        window.onload = generateUUID;
