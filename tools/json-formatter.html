@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JSON Formatter</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        textarea {
+            width: 100%;
+            max-width: 600px;
+            height: 80px;
+            margin-bottom: 16px;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            font-family: inherit;
+            font-size: 13px;
+            resize: vertical;
+        }
+
+        .display-box {
+            font-size: 13px;
+            font-weight: 500;
+            margin-top: 10px;
+            word-break: break-word;
+            min-height: 200px;
+            max-height: 500px;
+            overflow: auto;
+            background: #fff;
+            padding: 12px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            white-space: pre-wrap;
+            width: 100%;
+        }
+
+        .actions {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<nav class="back-nav">
+    <div class="btn-back" onclick="goBack()">← Other tools</div>
+</nav>
+
+<div class="container padded-centered-wrapper" style="max-width: 700px; margin: auto;">
+
+    <textarea id="jsonInput" placeholder="Paste JSON here..." oninput="formatJSONInput()"></textarea>
+
+    <div style="width: 100%; margin-top: 20px;">
+        <textarea id="outputBox" placeholder="Formatted result..."  class="display-box"></textarea>
+
+        <div class="actions">
+            <button onclick="copyOutput()" id="copyBtn">Copy</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    function formatJSONInput() {
+        const input = document.getElementById('jsonInput').value.trim();
+        const outputBox = document.getElementById('outputBox');
+
+        if (!input) {
+            outputBox.textContent = '';
+            return;
+        }
+
+        try {
+            const parsed = JSON.parse(input);
+            const formatted = JSON.stringify(parsed, null, 2);
+            outputBox.textContent = formatted;
+        } catch (e) {
+            outputBox.textContent = 'Invalid JSON';
+        }
+    }
+
+    function copyOutput() {
+        const text = document.getElementById('outputBox').value;
+        if (!text) return;
+
+        const copyBtn = document.getElementById('copyBtn');
+        navigator.clipboard.writeText(text).then(() => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = 'Copy';
+            }, 800);
+        });
+    }
+
+
+    function clearAll() {
+        document.getElementById('jsonInput').value = '';
+        document.getElementById('outputBox').textContent = '';
+    }
+
+    function goBack() {
+        window.location.href = "../";
+    }
+</script>
+
+</body>
+</html>
