@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <title>SQL Formatter (Aligned Insert)</title>
     <script src="https://cdn.jsdelivr.net/npm/sql-formatter@latest/dist/sql-formatter.min.js"></script>
+    <link rel="stylesheet" href="../style.css"> </head>
     <style>
-        body { font-family: sans-serif; background: #f8f9fa; padding: 20px; }
         .container { display: flex; flex-direction: column; align-items: center; }
 
         textarea {
@@ -31,16 +31,18 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
-        .btn-back { cursor: pointer; color: #007bff; margin-bottom: 20px; display: inline-block; }
     </style>
 </head>
 <body>
 
-<div class="btn-back" onclick="goBack()">← Other tools</div>
+<nav class="back-nav">
+    <div class="btn-back" onclick="goBack()">← Other tools</div>
+</nav>
 
-<div class="container">
-    <textarea id="inputSql" placeholder="Paste INSERT INTO statement here..." oninput="formatSQL()"></textarea>
+<div class="container centered-wrapper">
+    <textarea id="inputSql" placeholder="Paste SQL here..." oninput="formatSQL()"></textarea>
     <textarea id="outputSql" placeholder="Formatted result..." readonly></textarea>
+    <button onclick="copySQL()" id="copyBtn">Copy</button>
 </div>
 
 <script>
@@ -115,7 +117,20 @@
     }
 
     function goBack() {
-        alert("Navigating back...");
+        window.location.href = "../";
+    }
+
+    function copySQL() {
+        const text = document.getElementById('outputSql').value;
+        if (!text) return;
+
+        const copyBtn = document.getElementById('copyBtn');
+        navigator.clipboard.writeText(text).then(() => {
+            copyBtn.textContent = 'Copied!';
+            setTimeout(() => {
+                copyBtn.textContent = 'Copy';
+            }, 800);
+        });
     }
 </script>
 
