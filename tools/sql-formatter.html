@@ -2,57 +2,44 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>SQL Formatter</title>
-    <link rel="stylesheet" href="../style.css">
+    <title>SQL Formatter (Aligned Insert)</title>
     <style>
-        .display-box {
-            font-size: 13px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            white-space: pre-wrap;
-            word-break: break-word;
-            background: #fff;
-            padding: 16px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            width: 600px;
-            max-width: 90vw;
-            min-height: 120px;
-        }
+        body { font-family: sans-serif; background: #f8f9fa; padding: 20px; }
+        .container { display: flex; flex-direction: column; align-items: center; }
 
         textarea {
-            width: 600px;
-            max-width: 90vw;
-            height: 120px;
+            /* 2x wider than original 600px, responsive */
+            width: 1200px;
+            max-width: 95vw;
+            /* Expand vertically */
+            height: 300px;
             margin-bottom: 12px;
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #dee2e6;
-            font-family: monospace;
+            font-family: 'Courier New', monospace;
             font-size: 13px;
+            /* Handle horizontal overflow */
+            white-space: pre;
+            overflow-x: auto;
             resize: vertical;
         }
 
-        .controls {
-            margin-top: 10px;
+        #outputSql {
+            background: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
+
+        .btn-back { cursor: pointer; color: #007bff; margin-bottom: 20px; display: inline-block; }
     </style>
 </head>
 <body>
 
-<nav class="back-nav">
-    <div class="btn-back" onclick="goBack()">← Other tools</div>
-</nav>
+<div class="btn-back" onclick="goBack()">← Other tools</div>
 
-<div class="container padded-centered-wrapper">
-    <textarea id="inputSql" placeholder="Paste SQL here..."></textarea>
-
-    <div class="controls" style="margin-bottom: 20px; ">
-        <button onclick="formatSQL()">Format</button>
-        <button onclick="copySQL()" id="copyBtn">Copy</button>
-    </div>
-
-    <div id="outputSql" class="display-box"></div>
+<div class="container">
+    <textarea id="inputSql" placeholder="Paste INSERT INTO statement here..." oninput="formatSQL()"></textarea>
+    <textarea id="outputSql" placeholder="Formatted result..." readonly></textarea>
 </div>
 
 <script>
@@ -61,45 +48,69 @@
         const output = document.getElementById('outputSql');
 
         if (!input.trim()) {
-            output.textContent = '';
+            output.value = '';
             return;
         }
 
-        let formatted = input
-            // normalize spaces
-            .replace(/\s+/g, ' ')
-
-            // line breaks before keywords
-            .replace(/\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|HAVING|LIMIT|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|ON|AND|OR)\b/gi, '\n$1')
-
-            // indent AND/OR
-            .replace(/\n(AND|OR)\b/gi, '\n    $1')
-
-            // uppercase keywords
-            .replace(/\b(select|from|where|group by|order by|having|limit|join|left join|right join|inner join|outer join|on|and|or)\b/gi, match => match.toUpperCase())
-
-            // clean multiple newlines
-            .replace(/\n+/g, '\n')
-            .trim();
-
-        output.textContent = formatted;
+        // Check if it's an INSERT INTO statement to use special logic
+        if (/insert\s+into/i.test(input)) {
+            output.value = alignInsertInto(input);
+        } else {
+            // Fallback for standard SQL
+            output.value = input
+                .replace(/\s+/g, ' ')
+                .replace(/\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|HAVING|LIMIT|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|ON|AND|OR)\b/gi, '\n$1')
+                .toUpperCase();
+        }
     }
 
-    function copySQL() {
-        const text = document.getElementById('outputSql').textContent;
-        if (!text) return;
+    function alignInsertInto(sql) {
+        try {
+            // 1. Extract parts
+            const insertPart = sql.match(/insert\s+into\s+([\w.]+)\s*\((.*?)\)\s*values\s*(.*);?/is);
+            if (!insertPart) return sql;
 
-        const copyBtn = document.getElementById('copyBtn');
-        navigator.clipboard.writeText(text).then(() => {
-            copyBtn.textContent = 'Copied!';
-            setTimeout(() => {
-                copyBtn.textContent = 'Copy';
-            }, 800);
-        });
+            const tableName = insertPart[1];
+            const columns = insertPart[2].split(',').map(s => s.trim());
+
+            // Extract value rows: (v1, v2), (v3, v4)
+            const valuesRaw = insertPart[3].trim();
+            const rowMatches = valuesRaw.match(/\((.*?)\)/gs);
+            if (!rowMatches) return sql;
+
+            const rows = rowMatches.map(row =>
+                row.replace(/^\(|\)$/g, '').split(',').map(s => s.trim())
+            );
+
+            // 2. Calculate Max Widths for every column
+            const maxWidths = columns.map((col, i) => {
+                const cellLengths = rows.map(row => (row[i] || '').length);
+                return Math.max(col.length, ...cellLengths);
+            });
+
+            // 3. Format Helper
+            const padCell = (text, width) => text + ' '.repeat(Math.max(0, width - text.length));
+
+            // 4. Reconstruct Header
+            const formattedCols = columns.map((col, i) => padCell(col, maxWidths[i])).join(' , ');
+            let result = `INSERT INTO ${tableName}\n(${formattedCols}) VALUES\n`;
+
+            // 5. Reconstruct Rows
+            const formattedRows = rows.map((row, rowIndex) => {
+                const rowStr = row.map((cell, i) => padCell(cell, maxWidths[i])).join(' , ');
+                const isLast = rowIndex === rows.length - 1;
+                return `(${rowStr})${isLast ? ';' : ','}`;
+            });
+
+            return result + formattedRows.join('\n');
+        } catch (e) {
+            console.error(e);
+            return sql; // Return original on error
+        }
     }
 
     function goBack() {
-        window.location.href = "../";
+        alert("Navigating back...");
     }
 </script>
 
