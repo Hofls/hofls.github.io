@@ -48,7 +48,7 @@
 
 <div class="container padded-centered-wrapper" style="max-width: 700px; margin: auto;">
 
-    <textarea id="jwtInput" placeholder="Paste JWT here..."></textarea>
+    <textarea id="jwtInput" placeholder="Paste JWT here..." oninput="decodeJWT()"></textarea>
 
     <div class="controls">
         <button onclick="decodeJWT()">Decode</button>
