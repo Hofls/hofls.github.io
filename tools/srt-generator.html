@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Live SRT Generator</title>
+    <link rel="stylesheet" href="../style.css">
+    <style>
+        .display-box {
+          font-size: 13px;
+          font-weight: 500;
+          margin-bottom: 16px;
+          word-break: break-all;
+          min-height: 1.2em;
+          background: #fff;
+          padding: 12px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+          white-space: pre-wrap;
+        }
+
+        textarea {
+          width: 100%;
+          height: 120px;
+          margin-bottom: 16px;
+          padding: 10px;
+          border-radius: 8px;
+          border: 1px solid #dee2e6;
+          font-family: inherit;
+          font-size: 13px;
+          resize: vertical;
+        }
+
+        .section-title {
+          font-size: 13px;
+          opacity: 0.6;
+          margin: 10px;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        #currentLineDisplay, #nextLineDisplay {
+          font-size: 1.5rem;
+          font-weight: 600;
+          margin: 0.2rem 0;
+          color: #222;
+        }
+
+        #nextLineDisplay {
+          color: #adb5bd;
+          font-size: 1.1rem;
+        }
+
+        .controls {
+          text-align: center;
+        }
+
+    </style>
+</head>
+<body>
+
+<nav class="back-nav">
+    <div class="btn-back" onclick="goBack()">← Other tools</div>
+</nav>
+
+<div class="container padded-centered-wrapper" style="max-width: 700px; margin: auto;">
+
+    <div class="section-title">1. Paste Lyrics (one sentence per line)</div>
+    <textarea id="lyrics" placeholder="Paste lyrics here..."></textarea>
+
+    <div class="controls">
+        <div class="section-title">2. Run song, start timing</div>
+        <button onclick="startTiming()">Start Timing</button>
+        <div class="section-title">3. Press <strong>Enter</strong> each time line ends</div>
+    </div>
+
+    <div style="width: 100%; margin-top: 10px; text-align: center;">
+        <p id="currentLineDisplay">---</p>
+        <p id="nextLineDisplay"></p>
+    </div>
+
+    <div style="width: 100%; margin-top: 30px;">
+        <pre id="srtOutput" class="display-box" style="min-height: 200px;"></pre>
+        <div style="text-align: center; margin-bottom: 15px">
+            <button id="copyBtn" onclick="copyToClipboard()">Copy SRT</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let lines = [];
+    let timestamps = [];
+    let index = 0;
+    let startTime;
+    const output = document.getElementById("srtOutput");
+    const currentLineDisplay = document.getElementById("currentLineDisplay");
+    const nextLineDisplay = document.getElementById("nextLineDisplay");
+
+    function startTiming() {
+      const rawInput = document.getElementById("lyrics").value.trim();
+      if (!rawInput) return;
+
+      lines = rawInput.split("\n");
+      timestamps = [performance.now()];
+      index = 0;
+      output.textContent = "";
+      currentLineDisplay.textContent = lines[0] || "";
+      nextLineDisplay.textContent = lines[1] || "";
+      startTime = timestamps[0];
+    }
+
+    function recordLine() {
+      if (index >= lines.length || !startTime) return;
+
+      const now = performance.now();
+      timestamps.push(now);
+
+      const start = timestamps[index] - startTime;
+      const end = timestamps[index + 1] - startTime;
+      const srtEntry = formatSRT(index + 1, start, end, lines[index]);
+      output.textContent += srtEntry + "\n";
+
+      index++;
+
+      if (index < lines.length) {
+        currentLineDisplay.textContent = lines[index] || "";
+        nextLineDisplay.textContent = lines[index + 1] || "";
+      } else {
+        currentLineDisplay.textContent = "✅ Done!";
+        nextLineDisplay.textContent = "";
+      }
+
+      // Auto-scroll output
+      output.scrollTop = output.scrollHeight;
+    }
+
+    function formatSRT(i, startMs, endMs, text) {
+      return `${i}\n${formatTime(startMs)} --> ${formatTime(endMs)}\n${text}\n`;
+    }
+
+    function formatTime(ms) {
+      const date = new Date(ms);
+      return [
+        String(date.getUTCHours()).padStart(2, '0'),
+        String(date.getUTCMinutes()).padStart(2, '0'),
+        String(date.getUTCSeconds()).padStart(2, '0')
+      ].join(":") + "," + String(date.getUTCMilliseconds()).padStart(3, '0');
+    }
+
+    function copyToClipboard() {
+      const text = output.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+          const btn = document.getElementById('copyBtn');
+          const original = btn.textContent;
+          btn.textContent = 'Copied!';
+          setTimeout(() => btn.textContent = original, 2000);
+      });
+    }
+
+    function goBack() {
+      window.location.href = "../";
+    }
+
+    document.addEventListener("keydown", e => {
+      // Prevent recording if user is typing in the textarea
+      if (document.activeElement.id === "lyrics") return;
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        recordLine();
+      }
+    });
+</script>
+
+</body>
+</html>
