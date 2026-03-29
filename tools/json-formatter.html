@@ -14,7 +14,6 @@
 
         textarea {
             width: 100%;
-            /* Removed max-width to ensure it stays centered within the 700px wrapper */
             height: 80px;
             margin-bottom: 16px;
             padding: 10px;
@@ -31,8 +30,8 @@
             margin-top: 10px;
             word-break: break-word;
             min-height: 200px;
-            max-height: 500px;
-            overflow: auto;
+            /* UPDATED: Removed max-height and overflow to allow expansion */
+            overflow: hidden;
             background: #fff;
             padding: 12px;
             border-radius: 8px;
@@ -42,7 +41,7 @@
         }
 
         .actions {
-            margin-top: 10px;
+            margin-bottom: 15px;
             /* ADDED: Centers the button inside the actions div */
             display: flex;
             justify-content: center;
@@ -55,10 +54,10 @@
     <div class="btn-back" onclick="goBack()">← Other tools</div>
 </nav>
 
-<div class="container padded-centered-wrapper" style="max-width: 700px; margin: auto;">
+<div class="container padded-centered-wrapper" style="max-width: 1050px; margin: auto;">
 
     <textarea id="jsonInput" placeholder="Paste JSON here..." oninput="formatJSONInput()"></textarea>
-    <textarea id="outputBox" placeholder="Formatted result..."  class="display-box"></textarea>
+    <textarea id="outputBox" placeholder="Formatted result..." class="display-box" readonly></textarea>
 
     <div class="actions">
         <button onclick="copyOutput()" id="copyBtn">Copy</button>
@@ -72,16 +71,22 @@
         const outputBox = document.getElementById('outputBox');
 
         if (!input) {
-            outputBox.textContent = '';
+            outputBox.value = '';
+            outputBox.style.height = '200px';
             return;
         }
 
         try {
             const parsed = JSON.parse(input);
             const formatted = JSON.stringify(parsed, null, 2);
-            outputBox.textContent = formatted;
+            outputBox.value = formatted;
+
+            /* UPDATED: Auto-expand height logic */
+            outputBox.style.height = 'auto';
+            outputBox.style.height = outputBox.scrollHeight + 'px';
         } catch (e) {
-            outputBox.textContent = 'Invalid JSON';
+            outputBox.value = 'Invalid JSON';
+            outputBox.style.height = '200px';
         }
     }
 
@@ -98,10 +103,9 @@
         });
     }
 
-
     function clearAll() {
         document.getElementById('jsonInput').value = '';
-        document.getElementById('outputBox').textContent = '';
+        document.getElementById('outputBox').value = '';
     }
 
     function goBack() {
