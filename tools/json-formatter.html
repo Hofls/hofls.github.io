@@ -4,8 +4,10 @@
     <meta charset="UTF-8">
     <title>JSON Formatter</title>
     <link rel="stylesheet" href="../style.css">
+
+    <!-- JSONEditor CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/jsoneditor@9.10.0/dist/jsoneditor.min.css" rel="stylesheet">
     <style>
-        /* ADDED: Flexbox to center children and removed max-width conflict */
         .container {
             display: flex;
             flex-direction: column;
@@ -16,7 +18,6 @@
             width: 100%;
             height: 80px;
             margin-bottom: 16px;
-            padding: 10px;
             border-radius: 8px;
             border: 1px solid #dee2e6;
             font-family: inherit;
@@ -28,23 +29,30 @@
             font-size: 13px;
             font-weight: 500;
             margin-top: 10px;
-            word-break: break-word;
             min-height: 200px;
-            /* UPDATED: Removed max-height and overflow to allow expansion */
-            overflow: hidden;
             background: #fff;
-            padding: 12px;
+            padding: 0;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            white-space: pre-wrap;
             width: 100%;
+            overflow: hidden; /* IMPORTANT */
         }
 
         .actions {
+            margin-top: 15px;
             margin-bottom: 15px;
-            /* ADDED: Centers the button inside the actions div */
             display: flex;
             justify-content: center;
+        }
+
+        .jsoneditor {
+            border: none;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .jsoneditor-menu {
+            display: none;
         }
     </style>
 </head>
@@ -57,7 +65,8 @@
 <div class="container padded-centered-wrapper" style="max-width: 1050px; margin: auto;">
 
     <textarea id="jsonInput" placeholder="Paste JSON here..." oninput="formatJSONInput()"></textarea>
-    <textarea id="outputBox" placeholder="Formatted result..." class="display-box" readonly></textarea>
+
+    <div id="outputBox" class="display-box"></div>
 
     <div class="actions">
         <button onclick="copyOutput()" id="copyBtn">Copy</button>
@@ -65,33 +74,64 @@
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/jsoneditor@9.10.0/dist/jsoneditor.min.js"></script>
+
 <script>
+    let editor;
+
+    window.onload = function () {
+        const container = document.getElementById('outputBox');
+
+        editor = new JSONEditor(container, {
+            mode: 'code',
+            mainMenuBar: false,
+            statusBar: false
+        });
+
+        setEditorHeight(200);
+    };
+
+    function setEditorHeight(minHeight = 200) {
+        const container = document.getElementById('outputBox');
+        const text = editor.getText();
+
+        // Count the number of lines (at least 1)
+        const lineCount = text ? text.split('\n').length : 1;
+
+        // Manual calculation: 1 line = 10px
+        // Adding a small buffer (e.g., 40px) for padding/internal UI elements
+        const calculatedHeight = (lineCount * 20) + 40;
+
+        container.style.height = Math.max(calculatedHeight, minHeight) + 'px';
+
+        // Force the ACE editor (inside JSONEditor) to resize to the new container height
+        if (editor && editor.aceEditor) {
+            editor.aceEditor.resize();
+        }
+    }
+
     function formatJSONInput() {
         const input = document.getElementById('jsonInput').value.trim();
-        const outputBox = document.getElementById('outputBox');
 
         if (!input) {
-            outputBox.value = '';
-            outputBox.style.height = '200px';
+            editor.setText('');
+            setEditorHeight(200);
             return;
         }
 
         try {
             const parsed = JSON.parse(input);
             const formatted = JSON.stringify(parsed, null, 2);
-            outputBox.value = formatted;
-
-            /* UPDATED: Auto-expand height logic */
-            outputBox.style.height = 'auto';
-            outputBox.style.height = outputBox.scrollHeight + 'px';
+            editor.setText(formatted);
         } catch (e) {
-            outputBox.value = 'Invalid JSON';
-            outputBox.style.height = '200px';
+            editor.setText('Invalid JSON');
         }
+
+        setEditorHeight();
     }
 
     function copyOutput() {
-        const text = document.getElementById('outputBox').value;
+        const text = editor.getText();
         if (!text) return;
 
         const copyBtn = document.getElementById('copyBtn');
@@ -105,7 +145,8 @@
 
     function clearAll() {
         document.getElementById('jsonInput').value = '';
-        document.getElementById('outputBox').value = '';
+        editor.setText('');
+        setEditorHeight(200);
     }
 
     function goBack() {
