@@ -56,11 +56,7 @@
         if (/insert\s+into/i.test(input)) {
             output.value = alignInsertInto(input);
         } else {
-            // Fallback for standard SQL
-            output.value = input
-                .replace(/\s+/g, ' ')
-                .replace(/\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|HAVING|LIMIT|JOIN|LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|ON|AND|OR)\b/gi, '\n$1')
-                .toUpperCase();
+            output.value = formatGenericSQL(input);
         }
     }
 
@@ -106,6 +102,64 @@
         } catch (e) {
             console.error(e);
             return sql; // Return original on error
+        }
+    }
+
+    function formatGenericSQL(sql) {
+        try {
+            let formatted = sql
+                // Normalize spaces
+                .replace(/\s+/g, ' ')
+                .trim();
+
+            // Uppercase keywords
+            const keywords = [
+                "SELECT", "FROM", "WHERE", "GROUP BY", "ORDER BY", "HAVING", "LIMIT",
+                "JOIN", "LEFT JOIN", "RIGHT JOIN", "INNER JOIN", "OUTER JOIN",
+                "AND", "OR", "CASE", "WHEN", "THEN", "ELSE", "END"
+            ];
+
+            keywords.forEach(keyword => {
+                const regex = new RegExp(`\\b${keyword}\\b`, 'gi');
+                formatted = formatted.replace(regex, keyword);
+            });
+
+            // Line breaks for major clauses
+            formatted = formatted
+                .replace(/\bSELECT\b/g, '\nSELECT')
+                .replace(/\bFROM\b/g, '\nFROM')
+                .replace(/\bWHERE\b/g, '\nWHERE')
+                .replace(/\bGROUP BY\b/g, '\nGROUP BY')
+                .replace(/\bORDER BY\b/g, '\nORDER BY')
+                .replace(/\bHAVING\b/g, '\nHAVING')
+                .replace(/\bLIMIT\b/g, '\nLIMIT');
+
+            // JOIN formatting
+            formatted = formatted
+                .replace(/\b(LEFT JOIN|RIGHT JOIN|INNER JOIN|OUTER JOIN|JOIN)\b/g, '\n$1');
+
+            // WHERE conditions formatting
+            formatted = formatted
+                .replace(/\bAND\b/g, '\n    AND')
+                .replace(/\bOR\b/g, '\n    OR');
+
+
+
+            // GROUP BY / ORDER BY columns
+            formatted = formatted.replace(/(GROUP BY|ORDER BY)\s+(.*?)(\n|$)/gis, (match, clause, cols, end) => {
+                const splitCols = cols.split(',').map(c => c.trim());
+                return `${clause}\n    ${splitCols.join(',\n    ')}${end}`;
+            });
+
+            // Clean extra newlines
+            formatted = formatted
+                .replace(/\n{2,}/g, '\n')
+                .trim();
+
+            return formatted;
+        } catch (e) {
+            console.error(e);
+            return sql;
         }
     }
 
