@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Diff Checker</title>
+
+    <!-- Diff lib -->
+    <script src="https://cdn.jsdelivr.net/npm/diff-match-patch/index.js"></script>
+
+    <link rel="stylesheet" href="../style.css">
+
+    <style>
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .areas {
+            display: flex;
+            gap: 16px;
+            width: 1200px;
+            max-width: 95vw;
+        }
+
+        textarea, .diff-box {
+            width: 100%;
+            height: 300px;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre;
+            overflow-x: auto;
+            resize: vertical;
+            background: #fff;
+        }
+
+        .diff-box {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .added {
+            background-color: #d4f8d4;
+        }
+
+        .removed {
+            background-color: #ffd6d6;
+        }
+
+        .label {
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .column {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="back-nav">
+    <div class="btn-back" onclick="goBack()">← Other tools</div>
+</nav>
+
+<div class="container centered-wrapper">
+
+    <div class="areas">
+        <div class="column">
+            <div class="label">Before</div>
+            <textarea id="before" placeholder="Original text..." oninput="runDiff()"></textarea>
+            <div id="beforeDiff" class="diff-box"></div>
+        </div>
+
+        <div class="column">
+            <div class="label">After</div>
+            <textarea id="after" placeholder="Modified text..." oninput="runDiff()"></textarea>
+            <div id="afterDiff" class="diff-box"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const dmp = new diff_match_patch();
+
+    function runDiff() {
+        const before = document.getElementById('before').value;
+        const after = document.getElementById('after').value;
+
+        const beforeBox = document.getElementById('beforeDiff');
+        const afterBox = document.getElementById('afterDiff');
+
+        if (!before && !after) {
+            beforeBox.innerHTML = '';
+            afterBox.innerHTML = '';
+            return;
+        }
+
+        const diffs = dmp.diff_main(before, after);
+        dmp.diff_cleanupSemantic(diffs);
+
+        let beforeHtml = '';
+        let afterHtml = '';
+
+        diffs.forEach(([type, text]) => {
+            const safeText = escapeHtml(text);
+
+            if (type === 0) {
+                // equal
+                beforeHtml += safeText;
+                afterHtml += safeText;
+            } else if (type === -1) {
+                // removed (only on left)
+                beforeHtml += `<span class="removed">${safeText}</span>`;
+            } else if (type === 1) {
+                // added (only on right)
+                afterHtml += `<span class="added">${safeText}</span>`;
+            }
+        });
+
+        beforeBox.innerHTML = beforeHtml;
+        afterBox.innerHTML = afterHtml;
+    }
+
+    function escapeHtml(text) {
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+    }
+
+    function goBack() {
+        window.location.href = "../";
+    }
+</script>
+
+</body>
+</html>
