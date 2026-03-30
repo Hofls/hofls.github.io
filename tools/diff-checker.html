@@ -14,30 +14,42 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            gap: 12px;
         }
 
         .areas {
             display: flex;
-            gap: 16px;
-            width: 1200px;
-            max-width: 95vw;
+            flex-direction: column;
+            gap: 12px;
+            min-width: 98%;
         }
 
-        textarea, .diff-box {
+        .row {
+            display: flex;
+            gap: 16px;
             width: 100%;
-            height: 300px;
+        }
+
+        textarea {
+            width: 99%;
+            height: 80px; /* smaller */
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+
+        .diff-box {
+            width: 100%;
             padding: 12px;
             border-radius: 8px;
             border: 1px solid #dee2e6;
             font-family: 'Courier New', monospace;
             font-size: 13px;
             white-space: pre;
-            overflow-x: auto;
-            resize: vertical;
+            overflow: auto;
             background: #fff;
-        }
-
-        .diff-box {
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
 
@@ -49,8 +61,12 @@
             background-color: #ffd6d6;
         }
 
+        .current {
+            outline: 2px solid #333;
+        }
+
         .label {
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             font-size: 12px;
             color: #666;
         }
@@ -59,6 +75,24 @@
             display: flex;
             flex-direction: column;
             width: 100%;
+        }
+
+        .controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        button {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            background: #f1f3f5;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #e9ecef;
         }
     </style>
 </head>
@@ -69,26 +103,43 @@
     <div class="btn-back" onclick="goBack()">← Other tools</div>
 </nav>
 
-<div class="container centered-wrapper">
+<div class="container ">
 
-    <div class="areas">
-        <div class="column">
-            <div class="label">Before</div>
-            <textarea id="before" placeholder="Original text..." oninput="runDiff()"></textarea>
-            <div id="beforeDiff" class="diff-box"></div>
-        </div>
-
-        <div class="column">
-            <div class="label">After</div>
-            <textarea id="after" placeholder="Modified text..." oninput="runDiff()"></textarea>
-            <div id="afterDiff" class="diff-box"></div>
-        </div>
+    <div class="controls">
+        <button onclick="prevDiff()">↑ Prev</button>
+        <button onclick="nextDiff()">↓ Next</button>
+        <span id="counter"></span>
     </div>
 
+    <div class="areas">
+
+        <!-- INPUTS -->
+        <div class="row">
+            <div class="column">
+                <div class="label">Before</div>
+                <textarea id="before" oninput="runDiff()" placeholder="Original text..."></textarea>
+            </div>
+
+            <div class="column">
+                <div class="label">After</div>
+                <textarea id="after" oninput="runDiff()" placeholder="Modified text..."></textarea>
+            </div>
+        </div>
+
+        <!-- OUTPUT -->
+        <div class="row">
+            <div id="beforeDiff" class="diff-box"></div>
+            <div id="afterDiff" class="diff-box"></div>
+        </div>
+
+    </div>
 </div>
 
 <script>
     const dmp = new diff_match_patch();
+
+    let diffElements = [];
+    let currentIndex = -1;
 
     function runDiff() {
         const before = document.getElementById('before').value;
@@ -113,20 +164,66 @@
             const safeText = escapeHtml(text);
 
             if (type === 0) {
-                // equal
                 beforeHtml += safeText;
                 afterHtml += safeText;
             } else if (type === -1) {
-                // removed (only on left)
-                beforeHtml += `<span class="removed">${safeText}</span>`;
+                beforeHtml += `<span class="removed diff-item">${safeText}</span>`;
             } else if (type === 1) {
-                // added (only on right)
-                afterHtml += `<span class="added">${safeText}</span>`;
+                afterHtml += `<span class="added diff-item">${safeText}</span>`;
             }
         });
 
         beforeBox.innerHTML = beforeHtml;
         afterBox.innerHTML = afterHtml;
+
+        collectDiffs();
+    }
+
+    function collectDiffs() {
+        diffElements = [
+            ...document.querySelectorAll('.removed'),
+            ...document.querySelectorAll('.added')
+        ];
+
+        currentIndex = -1;
+        updateCounter();
+    }
+
+    function nextDiff() {
+        if (!diffElements.length) return;
+
+        currentIndex = (currentIndex + 1) % diffElements.length;
+        scrollToCurrent();
+    }
+
+    function prevDiff() {
+        if (!diffElements.length) return;
+
+        currentIndex = (currentIndex - 1 + diffElements.length) % diffElements.length;
+        scrollToCurrent();
+    }
+
+    function scrollToCurrent() {
+        diffElements.forEach(el => el.classList.remove('current'));
+
+        const el = diffElements[currentIndex];
+        el.classList.add('current');
+
+        el.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
+        });
+
+        updateCounter();
+    }
+
+    function updateCounter() {
+        const counter = document.getElementById('counter');
+        if (!diffElements.length) {
+            counter.textContent = '0 / 0';
+        } else {
+            counter.textContent = `${currentIndex + 1} / ${diffElements.length}`;
+        }
     }
 
     function escapeHtml(text) {
