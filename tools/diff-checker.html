@@ -70,6 +70,7 @@
         .column {
             display: flex;
             flex-direction: column;
+            padding-top: 10px;
             width: 100%;
         }
 
@@ -118,13 +119,11 @@
         <!-- INPUTS -->
         <div class="row">
             <div class="column">
-                <div class="label">Before</div>
                 <textarea id="before" oninput="runDiff()" placeholder="Original text..."></textarea>
             </div>
 
             <div class="column">
-                <div class="label">After</div>
-                <textarea id="after" oninput="runDiff()" placeholder="Modified text..."></textarea>
+                <textarea id="after" oninput="runDiff()" placeholder="Changed text..."></textarea>
             </div>
         </div>
 
