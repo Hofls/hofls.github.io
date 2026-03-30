@@ -164,6 +164,7 @@
 
         diffs.forEach(([type, text]) => {
             const safeText = escapeHtml(text);
+            if (!safeText) return;
 
             if (type === 0) {
                 beforeHtml += safeText;
