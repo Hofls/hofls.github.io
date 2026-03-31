@@ -97,6 +97,10 @@
             top: 20px; /* adjust to navbar height */
             z-index: 1000;
         }
+
+        .current {
+            outline: 1px solid #333;
+        }
     </style>
 </head>
 
@@ -119,11 +123,11 @@
         <!-- INPUTS -->
         <div class="row">
             <div class="column">
-                <textarea id="before" oninput="runDiff()" placeholder="Original text..."></textarea>
+                <textarea id="before" oninput="runDiff()" placeholder="Paste original text here..."></textarea>
             </div>
 
             <div class="column">
-                <textarea id="after" oninput="runDiff()" placeholder="Changed text..."></textarea>
+                <textarea id="after" oninput="runDiff()" placeholder="Paste changed text here..."></textarea>
             </div>
         </div>
 
